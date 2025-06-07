@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flower Bank App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #fdf8f6;
+            background-image: url("data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e8d5c4' fill-opacity='0.25'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        .font-display {
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05), 0 5px 15px rgba(0, 0, 0, 0.03);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            opacity: 0.7;
+        }
+        
+        .card.withdraw::after {
+            background: linear-gradient(90deg, #f44336, #FF9800);
+        }
+        
+        .card.history::after {
+            background: linear-gradient(90deg, #9C27B0, #E91E63);
+        }
+        
+        .card.balance::after {
+            background: linear-gradient(90deg, #2196F3, #00BCD4);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08), 0 10px 20px rgba(0, 0, 0, 0.04);
+        }
+        
+        .btn {
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            padding: 14px 24px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.4s ease;
+            z-index: -1;
+        }
+        
+        .btn:hover::before {
+            left: 0;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-add {
+            background: linear-gradient(135deg, #4CAF50, #8BC34A);
+            color: white;
+        }
+        
+        .btn-withdraw {
+            background: linear-gradient(135deg, #f44336, #FF9800);
+            color: white;
+        }
+        
+        .transaction-list-item {
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .transaction-list-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.02);
+            transition: width 0.3s ease;
+            z-index: 0;
+        }
+        
+        .transaction-list-item:hover::before {
+            width: 100%;
+        }
+        
+        .transaction-list-item:hover {
+            transform: translateX(5px);
+        }
+        
+        .transaction-add {
+            border-color: #4CAF50;
+        }
+        
+        .transaction-withdraw {
+            border-color: #f44336;
+        }
+        
+        .form-input {
+            border-radius: 12px;
+            border: 2px solid #e5e7eb;
+            padding: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #a78bfa;
+            box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .balance-shine {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .balance-shine::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to right,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.3) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: rotate(30deg);
+            animation: shine 6s infinite;
+        }
+        
+        @keyframes shine {
+            0% {
+                left: -50%;
+            }
+            100% {
+                left: 100%;
+            }
+        }
+        
+        .decoration-leaf {
+            position: absolute;
+            opacity: 0.1;
+            z-index: 0;
+        }
+        
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .empty-state-icon {
+            font-size: 3rem;
+            color: #e5e7eb;
+            margin-bottom: 1rem;
+        }
+        
+        /* Animation effects */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        .logo-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .logo-leaf {
+            color: #4CAF50;
+            transform-origin: center;
+            animation: leafWiggle 5s ease-in-out infinite;
+            display: inline-block;
+        }
+        
+        @keyframes leafWiggle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(5deg); }
+            75% { transform: rotate(-5deg); }
+        }
+        
+        .floating {
+            animation: floating 4s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+    <!-- Background decorations -->
+    <div class="decoration-leaf top-0 right-0 text-green-500 opacity-5">
+        <i class="fas fa-leaf text-9xl"></i>
+    </div>
+    <div class="decoration-leaf bottom-0 left-0 text-pink-500 opacity-5">
+        <i class="fas fa-seedling text-9xl"></i>
+    </div>
+
+    <div class="container mx-auto p-4 md:p-8 max-w-4xl relative">
+        <header class="text-center mb-10 md:mb-14 animate-fadeIn">
+            <div class="logo-container">
+                <h1 class="font-display text-4xl md:text-6xl font-bold text-pink-500">
+                    <span class="logo-leaf mr-2"><i class="fas fa-leaf"></i></span>Flower Bank
+                </h1>
+            </div>
+            <p class="text-gray-500 mt-2 md:text-lg">Your personal finance garden.</p>
+        </header>
+
+        <main class="space-y-8 md:space-y-10 relative z-10">
+            <!-- Balance Card -->
+            <section id="balance-card" class="card balance p-8 md:p-10 text-center relative overflow-hidden transform transition-all hover:scale-105">
+                <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-blue-50 to-green-50 opacity-20"></div>
+                <div class="relative z-10">
+                    <h2 class="text-lg md:text-xl font-semibold text-gray-600">Current Balance</h2>
+                    <div class="balance-shine mt-4">
+                        <p id="balance" class="text-5xl md:text-6xl font-bold text-green-600">$0.00</p>
+                    </div>
+                    <div class="w-16 h-1 bg-green-200 mx-auto mt-6 rounded-full"></div>
+                </div>
+            </section>
+
+            <!-- Action Forms -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Add Money Card -->
+                <div id="add-money-card" class="card p-6 md:p-8 relative">
+                    <div class="absolute top-4 right-4 text-green-100">
+                        <i class="fas fa-seedling text-4xl floating"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-6 text-center text-green-700 flex items-center justify-center">
+                        <i class="fas fa-plus-circle mr-3 text-2xl"></i>Add Money
+                    </h3>
+                    <form id="add-form" class="space-y-5 relative z-10">
+                        <div>
+                            <label for="add-amount" class="block text-sm text-gray-600 mb-2">Amount to deposit</label>
+                            <input type="number" id="add-amount" placeholder="Enter amount" class="w-full form-input" required min="0.01" step="0.01">
+                        </div>
+                        <button type="submit" class="w-full btn btn-add">
+                            <i class="fas fa-arrow-up mr-2"></i>Deposit
+                        </button>
+                    </form>
+                    <p id="add-error" class="text-red-500 text-sm mt-3 text-center h-5 font-medium"></p>
+                </div>
+
+                <!-- Withdraw Money Card -->
+                <div id="withdraw-money-card" class="card withdraw p-6 md:p-8 relative">
+                    <div class="absolute top-4 right-4 text-red-100">
+                        <i class="fas fa-hand-holding-usd text-4xl floating"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-6 text-center text-red-700 flex items-center justify-center">
+                        <i class="fas fa-minus-circle mr-3 text-2xl"></i>Withdraw Money
+                    </h3>
+                    <form id="withdraw-form" class="space-y-5 relative z-10">
+                        <div>
+                            <label for="withdraw-amount" class="block text-sm text-gray-600 mb-2">Amount to withdraw</label>
+                            <input type="number" id="withdraw-amount" placeholder="Enter amount" class="w-full form-input" required min="0.01" step="0.01">
+                        </div>
+                        <button type="submit" class="w-full btn btn-withdraw">
+                            <i class="fas fa-arrow-down mr-2"></i>Withdraw
+                        </button>
+                    </form>
+                    <p id="withdraw-error" class="text-red-500 text-sm mt-3 text-center h-5 font-medium"></p>
+                </div>
+            </div>
+
+            <!-- Transaction History -->
+            <section id="transaction-history-card" class="card history p-6 md:p-8 relative">
+                <div class="absolute top-4 right-4 text-purple-100">
+                    <i class="fas fa-receipt text-4xl floating"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-6 text-center flex items-center justify-center">
+                    <i class="fas fa-history mr-3 text-2xl text-purple-700"></i>
+                    <span class="text-purple-900">Transaction History</span>
+                </h3>
+                <div id="transaction-list-container" class="mt-6 max-h-96 overflow-y-auto pr-2 relative z-10">
+                    <ul id="transaction-list" class="space-y-4">
+                        <!-- Transactions will be dynamically inserted here -->
+                    </ul>
+                    <div id="no-transactions" class="empty-state hidden">
+                        <i class="fas fa-leaf empty-state-icon text-6xl text-gray-200 mb-4"></i>
+                        <p class="text-gray-500 text-lg">No transactions yet.</p>
+                        <p class="text-gray-400 text-sm mt-2">Your transaction history will grow here.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <footer class="text-center mt-10 text-gray-400 text-sm">
+            <p>© 2025 Flower Bank - Watch your finances bloom</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const balanceEl = document.getElementById('balance');
+            const addForm = document.getElementById('add-form');
+            const withdrawForm = document.getElementById('withdraw-form');
+            const addAmountInput = document.getElementById('add-amount');
+            const withdrawAmountInput = document.getElementById('withdraw-amount');
+            const addErrorEl = document.getElementById('add-error');
+            const withdrawErrorEl = document.getElementById('withdraw-error');
+            const transactionListEl = document.getElementById('transaction-list');
+            const noTransactionsEl = document.getElementById('no-transactions');
+
+            let balance = parseFloat(localStorage.getItem('flowerBankBalance')) || 0;
+            let transactions = JSON.parse(localStorage.getItem('flowerBankTransactions')) || [];
+
+            function updateUI() {
+                // Update balance with animation
+                const currentBalance = balanceEl.textContent;
+                const newBalance = `$${balance.toFixed(2)}`;
+                
+                if (currentBalance !== newBalance) {
+                    balanceEl.classList.add('balance-shine');
+                    setTimeout(() => {
+                        balanceEl.textContent = newBalance;
+                    }, 300);
+                    setTimeout(() => {
+                        balanceEl.classList.remove('balance-shine');
+                    }, 1500);
+                } else {
+                    balanceEl.textContent = newBalance;
+                }
+                
+                renderTransactions();
+                localStorage.setItem('flowerBankBalance', balance);
+                localStorage.setItem('flowerBankTransactions', JSON.stringify(transactions));
+            }
+
+            function renderTransactions() {
+                transactionListEl.innerHTML = '';
+                if (transactions.length === 0) {
+                    noTransactionsEl.classList.remove('hidden');
+                } else {
+                    noTransactionsEl.classList.add('hidden');
+                    transactions.slice().reverse().forEach((tx, index) => {
+                        const isAdd = tx.type === 'add';
+                        const li = document.createElement('li');
+                        li.className = `transaction-list-item p-5 rounded-lg flex justify-between items-center shadow-sm ${isAdd ? 'transaction-add' : 'transaction-withdraw'}`;
+                        li.style.animationDelay = `${index * 0.1}s`;
+                        
+                        const sign = isAdd ? '+' : '-';
+                        const amountColor = isAdd ? 'text-green-600' : 'text-red-600';
+                        const bgColor = isAdd ? 'bg-green-50' : 'bg-red-50';
+                        const iconBg = isAdd ? 'bg-green-100' : 'bg-red-100';
+
+                        li.innerHTML = `
+                            <div class="flex items-center">
+                                <div class="${iconBg} p-3 rounded-full mr-4">
+                                    <i class="fas ${isAdd ? 'fa-arrow-up' : 'fa-arrow-down'} ${amountColor}"></i>
+                                </div>
+                                <div>
+                                    <p class="font-semibold capitalize text-gray-800">${tx.type} Money</p>
+                                    <p class="text-sm text-gray-500">${new Date(tx.date).toLocaleString()}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold text-lg ${amountColor}">${sign}$${tx.amount.toFixed(2)}</p>
+                                <p class="text-sm text-gray-500">Balance: $${tx.balanceAfter.toFixed(2)}</p>
+                            </div>
+                        `;
+                        transactionListEl.appendChild(li);
+                        
+                        // Add animation effect
+                        setTimeout(() => {
+                            li.classList.add('animate-fadeIn');
+                        }, 10);
+                    });
+                }
+            }
+
+            function showFormError(el, message) {
+                el.textContent = message;
+                el.classList.add('animate-fadeIn');
+                
+                // Shake the input
+                const inputEl = el === addErrorEl ? addAmountInput : withdrawAmountInput;
+                inputEl.classList.add('border-red-500');
+                inputEl.classList.add('shake');
+                
+                setTimeout(() => {
+                    el.textContent = '';
+                    inputEl.classList.remove('border-red-500');
+                    inputEl.classList.remove('shake');
+                }, 3000);
+            }
+
+            addForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const amount = parseFloat(addAmountInput.value);
+
+                if (isNaN(amount) || amount <= 0) {
+                    showFormError(addErrorEl, 'Please enter a valid positive amount.');
+                    return;
+                }
+
+                balance += amount;
+                const transaction = {
+                    type: 'add',
+                    amount: amount,
+                    date: new Date().toISOString(),
+                    balanceAfter: balance
+                };
+                transactions.push(transaction);
+                
+                // Success feedback
+                addAmountInput.value = '';
+                addForm.classList.add('opacity-75');
+                setTimeout(() => {
+                    addForm.classList.remove('opacity-75');
+                }, 500);
+                
+                updateUI();
+            });
+
+            withdrawForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const amount = parseFloat(withdrawAmountInput.value);
+
+                if (isNaN(amount) || amount <= 0) {
+                    showFormError(withdrawErrorEl, 'Please enter a valid positive amount.');
+                    return;
+                }
+
+                if (amount > balance) {
+                    showFormError(withdrawErrorEl, 'Insufficient funds for this withdrawal.');
+                    return;
+                }
+
+                balance -= amount;
+                const transaction = {
+                    type: 'withdraw',
+                    amount: amount,
+                    date: new Date().toISOString(),
+                    balanceAfter: balance
+                };
+                transactions.push(transaction);
+
+                // Success feedback
+                withdrawAmountInput.value = '';
+                withdrawForm.classList.add('opacity-75');
+                setTimeout(() => {
+                    withdrawForm.classList.remove('opacity-75');
+                }, 500);
+                
+                updateUI();
+            });
+
+            // Add shake animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                    20%, 40%, 60%, 80% { transform: translateX(5px); }
+                }
+                .shake {
+                    animation: shake 0.5s ease-in-out;
+                }
+            `;
+            document.head.appendChild(style);
+
+            // Initial load
+            updateUI();
+        });
+    </script>
+</body>
+</html>
